@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import Cookies from 'js-cookie';
 import Button from '@mui/material/Button';
 import Radio from '@mui/material/Radio';
+import AddAssignment from '../AddAssignment.js';
 import {DataGrid} from '@mui/x-data-grid';
 import {SERVER_URL} from '../constants.js'
 
@@ -21,6 +22,39 @@ class Assignment extends React.Component {
    componentDidMount() {
     this.fetchAssignments();
   }
+
+    newAssignment = (assignment) => {
+    const token = Cookies.get('XSRF-TOKEN');
+    fetch(`${SERVER_URL}/assignment`, 
+      {  
+        method: 'POST', 
+        headers: 
+        { 
+          'X-XSRF-TOKEN': token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(assignment)
+      } )
+    .then(res => {
+        if (res.ok) {
+          toast.success("Assignment successfully added", {
+              position: toast.POSITION.BOTTOM_LEFT
+          });
+          this.fetchAssignments();
+        } else {
+          toast.error("Error new assignment failed.", {
+              position: toast.POSITION.BOTTOM_LEFT
+          });
+          console.error('Post http status =' + res.status);
+        }})
+    .catch(err => {
+      toast.error("Error new assignment failed.", {
+            position: toast.POSITION.BOTTOM_LEFT
+        });
+        console.error(err);
+    })
+  } 
+
  
   fetchAssignments = () => {
     console.log("Assignment.fetchAssignments");
@@ -83,6 +117,7 @@ class Assignment extends React.Component {
                     variant="outlined" color="primary" disabled={this.state.assignments.length===0}  style={{margin: 10}}>
               Grade
             </Button>
+		<AddAssignment add={this.newAssignment} />
             <ToastContainer autoClose={1500} /> 
           </div>
       )
